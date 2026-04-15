@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>designAI — Create. Instantly.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg: #080810;
+  --bg2: #0d0d1a;
+  --bg3: #111120;
+  --bg4: #161630;
+  --border: #1e1e35;
+  --border2: #2a2a45;
+  --text: #e8e8f0;
+  --text2: #9090b8;
+  --text3: #555570;
+  --accent: #7c6af7;
+  --accent2: #a89ff8;
+  --accent-bg: #1a1535;
+  --accent-border: #2d2560;
+  --success: #00c896;
+  --warning: #f7c948;
+  --danger: #ff5f5f;
+  --gold: #c9a96e;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--bg3); border: 1px solid var(--border2); color: var(--text);
+  padding: 10px 20px; border-radius: 30px; font-size: 13px; z-index: 9999;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1); pointer-events: none;
+  white-space: nowrap;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px; height: 60px;
+  background: rgba(8,8,16,0.85); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: #fff; letter-spacing: -0.5px; cursor: pointer; }
+.nav-logo span { color: var(--accent); }
+.nav-links { display: flex; align-items: center; gap: 6px; }
+.nav-link {
+  padding: 7px 16px; border-radius: 8px; font-size: 13.5px; color: var(--text2);
+  cursor: pointer; transition: all 0.15s; border: 1px solid transparent;
+}
+.nav-link:hover { color: var(--text); background: var(--bg3); }
+.nav-link.active { color: var(--accent2); background: var(--accent-bg); border-color: var(--accent-border); }
+.nav-btn {
+  background: var(--accent); color: #fff; border: none; padding: 8px 20px;
+  border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+  font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+}
+.nav-btn:hover { opacity: 0.85; }
+
+/* ── PAGES ── */
+.page { display: none; min-height: 100vh; padding-top: 60px; }
+.page.active { display: block; }
+
+/* ══════════════════════════════════
+   LANDING PAGE
+══════════════════════════════════ */
+.hero {
+  min-height: calc(100vh - 60px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 60px 24px 40px; position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(124,106,247,0.12) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,200,150,0.06) 0%, transparent 60%);
+}
+.hero-grid {
+  position: absolute; inset: 0; z-index: 0; opacity: 0.04;
+  background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-bg); border: 1px solid var(--accent-border);
+  color: var(--accent2); font-size: 12px; padding: 5px 14px; border-radius: 20px;
+  margin-bottom: 28px; position: relative; z-index: 1;
+  animation: fadeUp 0.6s ease both;
+}
+.badge-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+.hero h1 {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(42px, 7vw, 80px); line-height: 1.05; letter-spacing: -2px;
+  color: #fff; margin-bottom: 24px; position: relative; z-index: 1;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero h1 em { font-style: normal; color: var(--accent2); }
+.hero p {
+  font-size: clamp(15px, 2vw, 18px); color: var(--text2); max-width: 560px;
+  line-height: 1.7; margin-bottom: 40px; position: relative; z-index: 1;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; animation: fadeUp 0.6s 0.3s ease both; }
+.btn-primary {
+  background: var(--accent); color: #fff; border: none;
+  padding: 14px 32px; border-radius: var(--radius); font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background: #6a58e0; transform: translateY(-2px); }
+.btn-ghost {
+  background: transparent; color: var(--text2); border: 1px solid var(--border2);
+  padding: 14px 28px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+  font-size: 15px; cursor: pointer; transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent2); background: var(--accent-bg); }
+
+.hero-stats {
+  display: flex; gap: 40px; margin-top: 60px; position: relative; z-index: 1;
+  animation: fadeUp 0.6s 0.4s ease both; flex-wrap: wrap; justify-content: center;
+}
+.stat { text-align: center; }
+.stat-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; color: #fff; }
+.stat-label { font-size: 12px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Features */
+.features { padding: 100px 36px; max-width: 1100px; margin: 0 auto; }
+.section-header { text-align: center; margin-bottom: 60px; }
+.section-tag { font-size: 11px; color: var(--accent2); text-transform: uppercase; letter-spacing: 2px; font-weight: 500; margin-bottom: 12px; }
+.section-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px,4vw,42px); color: #fff; letter-spacing: -1px; margin-bottom: 14px; }
+.section-sub { font-size: 16px; color: var(--text2); max-width: 500px; margin: 0 auto; line-height: 1.6; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.feature-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 28px; transition: all 0.25s; position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: ''; position: absolute; inset: 0; opacity: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(124,106,247,0.08), transparent 70%);
+  transition: opacity 0.3s;
+}
+.feature-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon {
+  width: 44px; height: 44px; background: var(--accent-bg); border: 1px solid var(--accent-border);
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px; font-size: 18px;
+}
+.feature-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; color: #fff; margin-bottom: 8px; }
+.feature-desc { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+/* ══════════════════════════════════
+   STUDIO PAGE
+══════════════════════════════════ */
+.studio {
+  display: grid; grid-template-columns: 320px 1fr;
+  height: calc(100vh - 60px); overflow: hidden;
+}
+.studio-sidebar {
+  background: var(--bg2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+}
+.sidebar-section { padding: 20px; border-bottom: 1px solid var(--border); }
+.sidebar-section:last-child { border-bottom: none; flex: 1; display: flex; flex-direction: column; }
+.s-label {
+  font-size: 10px; font-weight: 600; color: var(--text3);
+  letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px;
+}
+.format-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.fmt-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text3);
+  padding: 10px 4px; border-radius: 8px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500;
+  text-align: center; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.fmt-btn .fi { font-size: 15px; }
+.fmt-btn:hover { background: var(--bg4); color: var(--text2); border-color: var(--border2); }
+.fmt-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent2); }
+
+.style-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.style-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text3);
+  padding: 9px 10px; border-radius: 8px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: 12px;
+  text-align: left; transition: all 0.15s; display: flex; align-items: center; gap: 7px;
+}
+.style-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.style-btn:hover { background: var(--bg4); color: var(--text2); }
+.style-btn.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent2); }
+
+/* Brand Kit */
+.brand-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.color-pick {
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: all 0.15s; flex-shrink: 0;
+}
+.color-pick.active { border-color: #fff; transform: scale(1.15); }
+input[type="color"] { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border2); cursor: pointer; background: none; padding: 0; }
+.brand-font {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  padding: 8px 10px; border-radius: 8px; font-size: 12px; width: 100%;
+  font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s;
+}
+.brand-font:focus { border-color: var(--accent); }
+
+/* Content area */
+.content-input {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+  color: var(--text); line-height: 1.6; resize: none; outline: none;
+  transition: border-color 0.2s; flex: 1; min-height: 120px;
+}
+.content-input:focus { border-color: var(--border2); }
+.content-input::placeholder { color: var(--text3); }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.chip {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text3);
+  font-size: 10.5px; padding: 3px 9px; border-radius: 20px; cursor: pointer;
+  transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+}
+.chip:hover { background: var(--bg4); color: var(--text2); border-color: var(--border2); }
+.char-count { font-size: 10px; color: var(--text3); text-align: right; margin-top: 4px; }
+
+.gen-btn {
+  background: linear-gradient(135deg, #6c5ce7, #8b5cf6); color: #fff; border: none;
+  padding: 13px; border-radius: var(--radius); cursor: pointer;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s; margin-top: 12px; letter-spacing: 0.2px;
+}
+.gen-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.gen-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin-ico { width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite; }
+
+/* Studio Canvas */
+.studio-canvas {
+  background: var(--bg); display: flex; flex-direction: column; overflow: hidden;
+}
+.canvas-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  background: var(--bg2); gap: 10px; flex-shrink: 0;
+}
+.toolbar-left { display: flex; align-items: center; gap: 8px; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; }
+.t-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  padding: 6px 14px; border-radius: 7px; cursor: pointer; font-size: 12px;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex;
+  align-items: center; gap: 5px;
+}
+.t-btn:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+.t-btn.accent { background: var(--accent-bg); border-color: var(--accent); color: var(--accent2); }
+.t-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.history-nav { display: flex; gap: 4px; }
+.h-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text3);
+  width: 30px; height: 30px; border-radius: 6px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.h-btn:hover:not(:disabled) { background: var(--bg4); color: var(--text2); }
+.h-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+.canvas-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 28px; display: flex; align-items: flex-start; justify-content: center;
+}
+.canvas-frame {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  width: 100%; max-width: 680px; min-height: 500px; overflow: hidden;
+  position: relative;
+}
+.canvas-frame iframe { width: 100%; border: none; display: block; min-height: 500px; }
+
+/* Empty / loading states */
+.empty-canvas {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 500px; text-align: center; padding: 48px;
+}
+.ec-icon {
+  width: 64px; height: 64px; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px; font-size: 26px;
+}
+.ec-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text3); margin-bottom: 8px; }
+.ec-sub { font-size: 13px; color: var(--text3); line-height: 1.6; max-width: 280px; opacity: 0.7; }
+.loading-canvas {
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 500px; text-align: center; padding: 48px;
+}
+.big-spinner {
+  width: 44px; height: 44px; border: 3px solid var(--border2); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 20px;
+}
+.l-text { font-size: 14px; color: var(--text2); margin-bottom: 4px; }
+.l-sub { font-size: 12px; color: var(--text3); }
+
+/* Error */
+.err-bar {
+  background: rgba(255,95,95,0.08); border: 1px solid rgba(255,95,95,0.2);
+  color: #ff8080; font-size: 12px; padding: 10px 16px; border-radius: 8px;
+  margin: 0 20px 12px; display: none;
+}
+
+/* ══════════════════════════════════
+   HISTORY PAGE
+══════════════════════════════════ */
+.history-page { padding: 36px; max-width: 1100px; margin: 0 auto; }
+.page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px; color: #fff; margin-bottom: 6px; letter-spacing: -1px; }
+.page-sub { font-size: 14px; color: var(--text2); margin-bottom: 32px; }
+.history-empty { text-align: center; padding: 80px 20px; color: var(--text3); }
+.history-empty p { font-size: 15px; margin-top: 12px; }
+.history-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.hist-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  overflow: hidden; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.hist-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+.hist-preview {
+  height: 180px; overflow: hidden; background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text3); position: relative;
+}
+.hist-preview iframe { width: 100%; height: 100%; border: none; pointer-events: none; transform-origin: top left; }
+.hist-info { padding: 14px 16px; }
+.hist-format {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+  color: var(--accent2); background: var(--accent-bg); border: 1px solid var(--accent-border);
+  padding: 2px 8px; border-radius: 20px; display: inline-block; margin-bottom: 6px;
+}
+.hist-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-date { font-size: 11px; color: var(--text3); }
+.hist-actions { display: flex; gap: 6px; padding: 0 16px 14px; }
+.hist-btn {
+  flex: 1; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); padding: 6px; border-radius: 7px; cursor: pointer;
+  font-size: 11px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; text-align: center;
+}
+.hist-btn:hover { background: var(--bg4); color: var(--text); }
+.hist-btn.del { color: #ff6060; }
+.hist-btn.del:hover { background: rgba(255,80,80,0.08); border-color: rgba(255,80,80,0.2); }
+
+/* ══════════════════════════════════
+   PRICING PAGE
+══════════════════════════════════ */
+.pricing-page { padding: 80px 36px; max-width: 1000px; margin: 0 auto; text-align: center; }
+.pricing-toggle {
+  display: inline-flex; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 30px; padding: 4px; margin-bottom: 48px; gap: 2px;
+}
+.pt-btn {
+  padding: 8px 20px; border-radius: 24px; font-size: 13px; cursor: pointer;
+  border: none; font-family: 'DM Sans', sans-serif; transition: all 0.2s; color: var(--text2); background: transparent;
+}
+.pt-btn.active { background: var(--accent); color: #fff; }
+.save-badge {
+  background: rgba(0,200,150,0.15); color: var(--success); font-size: 10px;
+  font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-left: 6px;
+  border: 1px solid rgba(0,200,150,0.3);
+}
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: left; }
+.plan-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 28px; position: relative; overflow: hidden; transition: all 0.2s;
+}
+.plan-card:hover { transform: translateY(-4px); }
+.plan-card.popular {
+  border-color: var(--accent); background: linear-gradient(180deg, rgba(124,106,247,0.08) 0%, var(--bg2) 100%);
+}
+.popular-badge {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--accent); color: #fff; font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.plan-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 20px; color: #fff; margin-bottom: 6px; }
+.plan-desc { font-size: 13px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+.plan-price { margin-bottom: 24px; }
+.plan-amount { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 40px; color: #fff; }
+.plan-period { font-size: 13px; color: var(--text3); margin-left: 4px; }
+.plan-features { list-style: none; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+.plan-features li { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text2); }
+.check { color: var(--success); font-size: 14px; font-weight: 700; }
+.cross { color: var(--text3); font-size: 14px; }
+.plan-cta {
+  width: 100%; padding: 12px; border-radius: 9px; font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s; border: none;
+}
+.plan-cta.outline {
+  background: transparent; border: 1px solid var(--border2); color: var(--text2);
+}
+.plan-cta.outline:hover { border-color: var(--accent); color: var(--accent2); background: var(--accent-bg); }
+.plan-cta.filled { background: var(--accent); color: #fff; }
+.plan-cta.filled:hover { background: #6a58e0; }
+
+/* ══════════════════════════════════
+   AFFILIATE PAGE
+══════════════════════════════════ */
+.affiliate-page { padding: 60px 36px; max-width: 960px; margin: 0 auto; }
+.aff-hero { text-align: center; margin-bottom: 60px; }
+.aff-hero h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 40px; color: #fff; letter-spacing: -1.5px; margin-bottom: 16px; }
+.aff-hero p { font-size: 16px; color: var(--text2); max-width: 500px; margin: 0 auto 32px; line-height: 1.6; }
+.aff-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 48px; }
+.aff-stat-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 24px; text-align: center;
+}
+.aff-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px; color: var(--accent2); }
+.aff-lbl { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.aff-steps { margin-bottom: 48px; }
+.aff-step {
+  display: flex; gap: 20px; align-items: flex-start;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 22px 24px; margin-bottom: 10px;
+}
+.step-num {
+  width: 36px; height: 36px; background: var(--accent-bg); border: 1px solid var(--accent-border);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent2); flex-shrink: 0; font-size: 14px;
+}
+.step-title { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 16px; color: #fff; margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.aff-signup-box {
+  background: linear-gradient(135deg, rgba(124,106,247,0.1), rgba(124,106,247,0.03));
+  border: 1px solid var(--accent-border); border-radius: var(--radius-lg); padding: 36px;
+  text-align: center;
+}
+.aff-signup-box h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 24px; color: #fff; margin-bottom: 10px; }
+.aff-signup-box p { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+.aff-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; }
+.aff-input {
+  flex: 1; background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); padding: 12px 14px; border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s;
+}
+.aff-input:focus { border-color: var(--accent); }
+.aff-input::placeholder { color: var(--text3); }
+
+/* ══════════════════════════════════
+   AUTH MODAL
+══════════════════════════════════ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px); z-index: 200; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-lg);
+  padding: 36px; width: 100%; max-width: 420px; position: relative; animation: scaleIn 0.2s ease;
+}
+@keyframes scaleIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+.modal-close {
+  position: absolute; top: 16px; right: 16px; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); width: 28px; height: 28px; border-radius: 7px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s;
+}
+.modal-close:hover { background: var(--bg4); color: var(--text); }
+.modal-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; color: #fff; margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+.modal-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--bg3); border-radius: 9px; padding: 3px; }
+.modal-tab {
+  flex: 1; padding: 8px; border-radius: 7px; border: none; background: transparent;
+  color: var(--text2); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.15s;
+}
+.modal-tab.active { background: var(--accent); color: #fff; font-weight: 500; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; color: var(--text2); margin-bottom: 5px; display: block; }
+.form-input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  padding: 11px 13px; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--accent); }
+.form-input::placeholder { color: var(--text3); }
+.form-btn {
+  width: 100%; background: var(--accent); color: #fff; border: none;
+  padding: 13px; border-radius: 9px; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; margin-top: 6px;
+}
+.form-btn:hover { opacity: 0.88; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 18px 0; }
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider-txt { font-size: 12px; color: var(--text3); }
+.social-btn {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  padding: 11px; border-radius: 9px; font-size: 13.5px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.social-btn:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+
+/* USER MENU */
+.user-menu-wrap { position: relative; }
+.user-avatar {
+  width: 32px; height: 32px; background: var(--accent-bg); border: 1px solid var(--accent-border);
+  border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: var(--accent2); transition: all 0.15s;
+}
+.user-avatar:hover { background: var(--bg4); }
+.user-dropdown {
+  display: none; position: absolute; top: 40px; right: 0; width: 180px;
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius);
+  overflow: hidden; z-index: 200;
+}
+.user-dropdown.open { display: block; animation: scaleIn 0.15s ease; }
+.ud-item {
+  padding: 10px 16px; font-size: 13px; color: var(--text2); cursor: pointer;
+  transition: all 0.1s; display: flex; align-items: center; gap: 8px;
+}
+.ud-item:hover { background: var(--bg3); color: var(--text); }
+.ud-item.danger { color: #ff6060; }
+.ud-item.danger:hover { background: rgba(255,80,80,0.08); }
+.ud-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* EXPORT PANEL */
+.export-panel {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px; margin: 8px 0; display: none;
+}
+.export-panel.open { display: block; }
+.exp-title { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 10px; }
+.exp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.exp-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.exp-btn:hover { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+.exp-btn .exp-ico { font-size: 16px; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .studio { grid-template-columns: 1fr; }
+  .studio-sidebar { max-height: 340px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Welcome to designAI</div>
+    <div class="modal-sub">Sign in to save your designs and access your history</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchTab('login',this)">Sign In</button>
+      <button class="modal-tab" onclick="switchTab('signup',this)">Create Account</button>
+    </div>
+    <div id="loginForm">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="loginEmail" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="loginPass" placeholder="••••••••"></div>
+      <button class="form-btn" onclick="doLogin()">Sign In</button>
+      <div class="divider"><div class="divider-line"></div><div class="divider-txt">or</div><div class="divider-line"></div></div>
+      <button class="social-btn" onclick="googleAuth()">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+    <div id="signupForm" style="display:none">
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="signupName" placeholder="Your Name"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="signupEmail" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="signupPass" placeholder="Min 8 characters"></div>
+      <button class="form-btn" onclick="doSignup()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('landing')">design<span>AI</span></div>
+  <div class="nav-links">
+    <div class="nav-link" id="nl-landing" onclick="showPage('landing')">Home</div>
+    <div class="nav-link" id="nl-studio" onclick="showPage('studio')">Studio</div>
+    <div class="nav-link" id="nl-history" onclick="showPage('history')">My Designs</div>
+    <div class="nav-link" id="nl-pricing" onclick="showPage('pricing')">Pricing</div>
+    <div class="nav-link" id="nl-affiliate" onclick="showPage('affiliate')">Affiliate</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div id="navAuthBtn">
+      <button class="nav-btn" onclick="openModal()">Sign In</button>
+    </div>
+    <div id="navUserMenu" style="display:none" class="user-menu-wrap">
+      <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">U</div>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="ud-item" onclick="showPage('history')">🎨 My Designs</div>
+        <div class="ud-item" onclick="showPage('studio')">✨ New Design</div>
+        <div class="ud-sep"></div>
+        <div class="ud-item danger" onclick="logout()">Sign Out</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ LANDING ══ -->
+<div class="page active" id="page-landing">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-badge"><div class="badge-dot"></div> AI-Powered Design Studio</div>
+    <h1>Design without a<br><em>designer.</em></h1>
+    <p>Paste your content. Pick a style. Get a stunning poster, infographic, or carousel in seconds — designed by AI that thinks like a professional.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('studio')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Start Creating Free
+      </button>
+      <button class="btn-ghost" onclick="showPage('pricing')">See Pricing →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Design Formats</div></div>
+      <div class="stat"><div class="stat-num">6</div><div class="stat-label">Visual Styles</div></div>
+      <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Possibilities</div></div>
+    </div>
+  </div>
+  <div class="features">
+    <div class="section-header">
+      <div class="section-tag">Why designAI</div>
+      <div class="section-title">Everything you need.<br>Nothing you don't.</div>
+      <div class="section-sub">Built for people who want beautiful designs without spending hours in Canva or paying a designer.</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">Thinks Like a Designer</div>
+        <div class="feature-desc">The AI handles visual hierarchy, typography pairing, color theory, and spacing — automatically.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Seconds, Not Hours</div>
+        <div class="feature-desc">No templates to fill. No drag-and-drop. Paste your content and your design is ready.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Your Brand, Always</div>
+        <div class="feature-desc">Set your brand colors and fonts once. Every design reflects your identity perfectly.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <div class="feature-title">Every Format Covered</div>
+        <div class="feature-desc">Posters, infographics, Instagram carousels — all from the same content in one click.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💾</div>
+        <div class="feature-title">Save & Export</div>
+        <div class="feature-desc">Download as PNG or PDF. Save to your account. Share anywhere instantly.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💸</div>
+        <div class="feature-title">Earn as a Partner</div>
+        <div class="feature-desc">Share your link and earn 30% recurring commission on every referral you bring in.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDIO ══ -->
+<div class="page" id="page-studio">
+  <div class="studio">
+    <!-- SIDEBAR -->
+    <div class="studio-sidebar">
+      <div class="sidebar-section">
+        <div class="s-label">Format</div>
+        <div class="format-grid">
+          <button class="fmt-btn active" data-f="poster" onclick="setFmt(this)"><span class="fi">🪟</span>Poster</button>
+          <button class="fmt-btn" data-f="infographic" onclick="setFmt(this)"><span class="fi">📊</span>Infographic</button>
+          <button class="fmt-btn" data-f="carousel" onclick="setFmt(this)"><span class="fi">🎠</span>Carousel</button>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="s-label">Visual Style</div>
+        <div class="style-grid">
+          <button class="style-btn active" data-s="bold-dark" onclick="setStyle(this)"><span class="style-dot" style="background:#7c6af7"></span>Bold Dark</button>
+          <button class="style-btn" data-s="minimal-clean" onclick="setStyle(this)"><span class="style-dot" style="background:#e2e2ff"></span>Minimal</button>
+          <button class="style-btn" data-s="vibrant" onclick="setStyle(this)"><span class="style-dot" style="background:#f7c948"></span>Vibrant</button>
+          <button class="style-btn" data-s="editorial" onclick="setStyle(this)"><span class="style-dot" style="background:#ff7c5c"></span>Editorial</button>
+          <button class="style-btn" data-s="neon-tech" onclick="setStyle(this)"><span class="style-dot" style="background:#00e5a0"></span>Neon Tech</button>
+          <button class="style-btn" data-s="luxury" onclick="setStyle(this)"><span class="style-dot" style="background:#c9a96e"></span>Luxury</button>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="s-label">Brand Kit</div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:5px">Accent Color</div>
+          <div class="brand-row" id="colorRow">
+            <div class="color-pick active" style="background:#7c6af7" data-c="#7c6af7" onclick="setBrandColor(this)"></div>
+            <div class="color-pick" style="background:#e8634a" data-c="#e8634a" onclick="setBrandColor(this)"></div>
+            <div class="color-pick" style="background:#00c896" data-c="#00c896" onclick="setBrandColor(this)"></div>
+            <div class="color-pick" style="background:#f7c948" data-c="#f7c948" onclick="setBrandColor(this)"></div>
+            <div class="color-pick" style="background:#e040fb" data-c="#e040fb" onclick="setBrandColor(this)"></div>
+            <div class="color-pick" style="background:#29b6f6" data-c="#29b6f6" onclick="setBrandColor(this)"></div>
+            <input type="color" id="customColor" title="Custom color" onchange="setCustomColor(this)" value="#7c6af7">
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:5px">Brand Name (optional)</div>
+          <input class="brand-font" type="text" id="brandName" placeholder="Your Brand Name">
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="s-label">Content</div>
+        <div class="chips" id="exampleChips">
+          <span class="chip" onclick="fillEx('product')">Product launch</span>
+          <span class="chip" onclick="fillEx('tips')">Tips listicle</span>
+          <span class="chip" onclick="fillEx('stats')">Stats & data</span>
+          <span class="chip" onclick="fillEx('event')">Event promo</span>
+          <span class="chip" onclick="fillEx('quote')">Motivational</span>
+        </div>
+        <textarea class="content-input" id="mainContent" placeholder="Paste your content here — topic, bullet points, key facts, or anything you want turned into a design. AI handles the rest." rows="6" oninput="updateCC()"></textarea>
+        <div class="char-count" id="cc">0 / 1200</div>
+        <div class="export-panel" id="exportPanel">
+          <div class="exp-title">Export Design</div>
+          <div class="exp-grid">
+            <button class="exp-btn" onclick="exportPNG()"><span class="exp-ico">🖼️</span>PNG Image</button>
+            <button class="exp-btn" onclick="exportHTML()"><span class="exp-ico">📄</span>HTML File</button>
+          </div>
+        </div>
+        <button class="gen-btn" id="genBtn" onclick="generate()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generate Design
+        </button>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="studio-canvas">
+      <div class="canvas-toolbar">
+        <div class="toolbar-left">
+          <div class="history-nav">
+            <button class="h-btn" id="undoBtn" onclick="undo()" disabled title="Undo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+            </button>
+            <button class="h-btn" id="redoBtn" onclick="redo()" disabled title="Redo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+            </button>
+          </div>
+          <span style="font-size:11px;color:var(--text3)" id="histLabel">No history</span>
+        </div>
+        <div class="toolbar-right">
+          <button class="t-btn" id="saveBtn" onclick="saveDesign()" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save
+          </button>
+          <button class="t-btn accent" id="exportBtn" onclick="toggleExport()" disabled>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+      </div>
+      <div class="err-bar" id="errBar"></div>
+      <div class="canvas-area">
+        <div class="canvas-frame" id="canvasFrame">
+          <div class="empty-canvas" id="emptyCanvas">
+            <div class="ec-icon">✨</div>
+            <div class="ec-title">Your design lives here</div>
+            <div class="ec-sub">Pick a format, choose a style, paste your content, and hit Generate</div>
+          </div>
+          <div class="loading-canvas" id="loadCanvas">
+            <div class="big-spinner"></div>
+            <div class="l-text" id="lText">Thinking like a designer…</div>
+            <div class="l-sub" id="lSub">Analyzing content structure</div>
+          </div>
+          <iframe id="designFrame" style="display:none" sandbox="allow-scripts"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HISTORY ══ -->
+<div class="page" id="page-history">
+  <div class="history-page">
+    <div class="page-title">My Designs</div>
+    <div class="page-sub">Your saved designs — click any to reopen in Studio</div>
+    <div id="historyGrid" class="history-grid"></div>
+    <div id="historyEmpty" class="history-empty">
+      <div style="font-size:40px">🎨</div>
+      <p>No saved designs yet. <span style="color:var(--accent);cursor:pointer" onclick="showPage('studio')">Create your first one →</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRICING ══ -->
+<div class="page" id="page-pricing">
+  <div class="pricing-page">
+    <div class="section-header">
+      <div class="section-tag">Simple Pricing</div>
+      <div class="section-title">Start free. Scale when ready.</div>
+      <div class="section-sub">No credit card needed for free tier. Cancel anytime.</div>
+    </div>
+    <div class="pricing-toggle">
+      <button class="pt-btn active" id="ptMonthly" onclick="setBilling('monthly')">Monthly</button>
+      <button class="pt-btn" id="ptYearly" onclick="setBilling('yearly')">Yearly <span class="save-badge">Save 40%</span></button>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan-card">
+        <div class="plan-name">Free</div>
+        <div class="plan-desc">Perfect for trying out designAI and personal use.</div>
+        <div class="plan-price"><span class="plan-amount">₹0</span><span class="plan-period">forever</span></div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> 5 designs per month</li>
+          <li><span class="check">✓</span> All 3 formats</li>
+          <li><span class="check">✓</span> 3 visual styles</li>
+          <li><span class="check">✓</span> HTML export</li>
+          <li><span class="cross">–</span> PNG / PDF export</li>
+          <li><span class="cross">–</span> Saved history</li>
+          <li><span class="cross">–</span> Brand kit</li>
+        </ul>
+        <button class="plan-cta outline" onclick="showPage('studio')">Start Free</button>
+      </div>
+      <div class="plan-card popular">
+        <div class="popular-badge">Popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">For creators, marketers, and small business owners.</div>
+        <div class="plan-price"><span class="plan-amount" id="proPrice">₹799</span><span class="plan-period" id="proPeriod">/month</span></div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Unlimited designs</li>
+          <li><span class="check">✓</span> All 3 formats</li>
+          <li><span class="check">✓</span> All 6 visual styles</li>
+          <li><span class="check">✓</span> PNG + PDF export</li>
+          <li><span class="check">✓</span> Design history</li>
+          <li><span class="check">✓</span> Brand kit</li>
+          <li><span class="cross">–</span> Team sharing</li>
+        </ul>
+        <button class="plan-cta filled" onclick="openModal()">Get Pro</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">Business</div>
+        <div class="plan-desc">For agencies, teams, and power users who need more.</div>
+        <div class="plan-price"><span class="plan-amount" id="bizPrice">₹2,499</span><span class="plan-period" id="bizPeriod">/month</span></div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Everything in Pro</li>
+          <li><span class="check">✓</span> Team sharing (5 seats)</li>
+          <li><span class="check">✓</span> White-label export</li>
+          <li><span class="check">✓</span> Priority AI generation</li>
+          <li><span class="check">✓</span> API access</li>
+          <li><span class="check">✓</span> Custom brand presets</li>
+          <li><span class="check">✓</span> Dedicated support</li>
+        </ul>
+        <button class="plan-cta outline" onclick="openModal()">Contact Sales</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AFFILIATE ══ -->
+<div class="page" id="page-affiliate">
+  <div class="affiliate-page">
+    <div class="aff-hero">
+      <div class="section-tag">Partner Program</div>
+      <h2>Earn 30% recurring<br>commission</h2>
+      <p>Share designAI with your audience and earn every month they stay subscribed. No cap. No expiry.</p>
+    </div>
+    <div class="aff-stats-row">
+      <div class="aff-stat-card"><div class="aff-num">30%</div><div class="aff-lbl">Recurring commission</div></div>
+      <div class="aff-stat-card"><div class="aff-num">60 days</div><div class="aff-lbl">Cookie window</div></div>
+      <div class="aff-stat-card"><div class="aff-num">Monthly</div><div class="aff-lbl">Payout cycle</div></div>
+    </div>
+    <div class="aff-steps">
+      <div class="aff-step">
+        <div class="step-num">1</div>
+        <div><div class="step-title">Sign up as a partner</div><div class="step-desc">Create your free designAI account and apply for the affiliate program. Approval is instant.</div></div>
+      </div>
+      <div class="aff-step">
+        <div class="step-num">2</div>
+        <div><div class="step-title">Share your unique link</div><div class="step-desc">Post it on Instagram, YouTube, newsletters, or anywhere your audience hangs out. We'll track every click.</div></div>
+      </div>
+      <div class="aff-step">
+        <div class="step-num">3</div>
+        <div><div class="step-title">Earn every month</div><div class="step-desc">For every paying subscriber you bring in, earn 30% of their monthly subscription — for as long as they stay.</div></div>
+      </div>
+    </div>
+    <div class="aff-signup-box">
+      <h3>Ready to earn?</h3>
+      <p>Join our affiliate program today. It's free, instant, and pays every month.</p>
+      <div class="aff-form">
+        <input class="aff-input" type="email" id="affEmail" placeholder="your@email.com">
+        <button class="nav-btn" onclick="joinAffiliate()">Join Now →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let currentFmt = 'poster', currentStyle = 'bold-dark', brandColor = '#7c6af7';
+let currentUser = null, generatedHTML = '', designHistory = [], historyIdx = -1;
+let savedDesigns = JSON.parse(localStorage.getItem('dai_saved') || '[]');
+let billing = 'monthly';
+let loadingTimer;
+
+const examples = {
+  product: `Introducing FlowDesk Pro\n\nThe all-in-one workspace for modern teams.\n\n• Smart task automation that learns your workflow\n• Real-time collaboration across time zones\n• AI-powered meeting summaries\n• Integrates with 200+ tools\n\nLaunch price: ₹499/month\nFree trial — no credit card needed`,
+  tips: `5 Rules for Better Sleep\n\n1. No screens 1 hour before bed\n2. Keep your room at 18°C / 65°F\n3. Same wake-up time every day — even weekends\n4. Avoid caffeine after 2pm\n5. Write 3 things you're grateful for\n\nSleep is the foundation of everything.`,
+  stats: `The State of Remote Work 2024\n\n• 68% of workers prefer hybrid over full-time office\n• Remote workers save avg. ₹40,000/year on commuting\n• Companies with flexible work see 35% less turnover\n• Productivity up 13% in home-based roles\n• 82% of leaders plan to keep remote options\n\nSource: Global Work Index 2024`,
+  event: `Design Summit Chennai 2025\n\nJoin 500+ designers, founders & creatives for one unmissable day.\n\nJune 14 · 9AM – 7PM · ITC Grand Chola\n\nKeynotes by industry leaders\nLive portfolio reviews\nNetworking dinner included\n\nEarly bird: ₹999\nRegister at designsummit.in`,
+  quote: `"The only way to do great work is to love what you do."\n\n— Steve Jobs\n\nPassion is the difference between a job and a calling. Find yours.`
+};
+
+const styleGuides = {
+  'bold-dark': `Dark background (#0a0a14), electric purple/violet accents (#7c6af7 or brand color), white headline text, subtle geometric shapes in background, premium and modern. Use heavy font weight contrast and dramatic sizing.`,
+  'minimal-clean': `Pure white background, near-black typography, single accent (use brand color), swiss design influence, extremely generous whitespace, thin lines, refined grid structure. Clean, breathe-able, professional.`,
+  'vibrant': `Energetic gradient background (use brand color prominently), dark text for contrast, playful geometric shapes, bold display typography, kinetic feel, high saturation. Fun and dynamic.`,
+  'editorial': `Off-white/cream background (#faf8f4), dark charcoal text, brand color as accent, editorial magazine layout, sophisticated. Mix display and body typefaces. Asymmetric grid.`,
+  'neon-tech': `Very dark background (#060610), neon brand color accents, tech/startup feel, monospace-influenced, glowing border effects on key elements, futuristic. Data and structure focused.`,
+  'luxury': `Deep black or very dark background, gold/brand color accents, cream/ivory text, elegant layout, thin lines, maximum refinement. Premium brand aesthetic. Less is more.`
+};
+
+const fmtInstructions = {
+  poster: `Single vertical POSTER (600px × 760px fixed dimensions). Strong dominant headline, supporting text, one clear visual focal point. Use CSS shapes/patterns for decoration. Strong visual hierarchy.`,
+  infographic: `Vertical INFOGRAPHIC (600px wide, auto height min 800px). Break content into 4-6 distinct sections with icons (Unicode or CSS-drawn), callout boxes, big numbers. Top-to-bottom flow with clear section dividers.`,
+  carousel: `3-slide CAROUSEL (560×560px squares, Instagram format). JS navigation with prev/next buttons and dot indicators. Slide 1: hook/headline, Slide 2: main content, Slide 3: CTA. Consistent visual theme across slides.`
+};
+
+// ── NAVIGATION ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const nl = document.getElementById('nl-' + id);
+  if (nl) nl.classList.add('active');
+  if (id === 'history') renderHistory();
+  window.scrollTo(0,0);
+}
+
+// ── STUDIO CONTROLS ──
+function setFmt(btn) {
+  document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFmt = btn.dataset.f;
+}
+function setStyle(btn) {
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentStyle = btn.dataset.s;
+}
+function setBrandColor(el) {
+  document.querySelectorAll('.color-pick').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  brandColor = el.dataset.c;
+}
+function setCustomColor(inp) {
+  brandColor = inp.value;
+  document.querySelectorAll('.color-pick').forEach(c => c.classList.remove('active'));
+}
+function fillEx(type) {
+  document.getElementById('mainContent').value = examples[type];
+  updateCC();
+}
+function updateCC() {
+  const l = document.getElementById('mainContent').value.length;
+  document.getElementById('cc').textContent = l + ' / 1200';
+}
+function toggleExport() {
+  const p = document.getElementById('exportPanel');
+  p.classList.toggle('open');
+}
+
+// ── HISTORY (undo/redo) ──
+function pushHistory(html) {
+  designHistory = designHistory.slice(0, historyIdx + 1);
+  designHistory.push(html);
+  historyIdx = designHistory.length - 1;
+  updateHistoryUI();
+}
+function updateHistoryUI() {
+  document.getElementById('undoBtn').disabled = historyIdx <= 0;
+  document.getElementById('redoBtn').disabled = historyIdx >= designHistory.length - 1;
+  document.getElementById('histLabel').textContent = designHistory.length > 0 ? `Version ${historyIdx + 1} of ${designHistory.length}` : 'No history';
+}
+function undo() {
+  if (historyIdx > 0) { historyIdx--; renderFrame(designHistory[historyIdx]); updateHistoryUI(); }
+}
+function redo() {
+  if (historyIdx < designHistory.length - 1) { historyIdx++; renderFrame(designHistory[historyIdx]); updateHistoryUI(); }
+}
+
+// ── GENERATE ──
+const loadMsgs = [
+  ['Thinking like a designer…', 'Analyzing content structure'],
+  ['Planning visual hierarchy…', 'Choosing layout & composition'],
+  ['Selecting typography…', 'Pairing fonts for maximum impact'],
+  ['Applying color theory…', 'Building the visual system'],
+  ['Finalizing design…', 'Almost there…']
+];
+function startLoading() {
+  let i = 0;
+  const lt = document.getElementById('lText'), ls = document.getElementById('lSub');
+  lt.textContent = loadMsgs[0][0]; ls.textContent = loadMsgs[0][1];
+  loadingTimer = setInterval(() => {
+    i = (i + 1) % loadMsgs.length;
+    lt.textContent = loadMsgs[i][0]; ls.textContent = loadMsgs[i][1];
+  }, 1900);
+}
+function stopLoading() { clearInterval(loadingTimer); }
+
+function showCanvas(state) {
+  document.getElementById('emptyCanvas').style.display = state === 'empty' ? 'flex' : 'none';
+  document.getElementById('loadCanvas').style.display = state === 'loading' ? 'flex' : 'none';
+  document.getElementById('designFrame').style.display = state === 'output' ? 'block' : 'none';
+  const hasDes = state === 'output';
+  document.getElementById('saveBtn').disabled = !hasDes;
+  document.getElementById('exportBtn').disabled = !hasDes;
+}
+
+async function generate() {
+  const content = document.getElementById('mainContent').value.trim();
+  if (!content) { showErr('Please paste some content first.'); return; }
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin-ico"></div> Generating…';
+  showCanvas('loading'); startLoading();
+  document.getElementById('exportPanel').classList.remove('open');
+
+  const prompt = `You are an elite visual designer. Create a stunning, production-quality ${currentFmt} design as self-contained HTML+CSS.
+
+VISUAL STYLE: ${styleGuides[currentStyle]}
+BRAND COLOR: Use ${brandColor} as the primary accent/brand color throughout the design.
+${document.getElementById('brandName').value ? 'BRAND NAME: ' + document.getElementById('brandName').value : ''}
+
+FORMAT: ${fmtInstructions[currentFmt]}
+
+CONTENT:
+${content}
+
+DESIGNER LAWS:
+1. Typography hierarchy is paramount — huge contrast between headline and body (headline 3-5x larger)
+2. Perfect alignment — use CSS Grid/Flexbox, never approximate spacing
+3. Generous padding — minimum 36px outer, breathe-able sections
+4. Every element has purpose — zero filler
+5. Color with intention — max 3 colors + neutrals, brand color is dominant accent
+6. This must look like a Behance trending design, not a template
+7. Use Google-safe web fonts (system fonts only): use font-family stacks like 'Georgia, serif' for display or 'system-ui, sans-serif' for body — NO external font imports
+
+OUTPUT: Return ONLY the raw HTML. No markdown fences, no explanation, no commentary. Start with <!DOCTYPE html>.
+Body background must match the design aesthetic. Design must be complete and production-ready.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API error');
+    let html = data.content?.find(b => b.type === 'text')?.text || '';
+    html = html.replace(/^```html\n?/i,'').replace(/\n?```$/i,'').trim();
+    if (!html.includes('<html') && !html.includes('<!DOCTYPE')) throw new Error('Invalid response. Please try again.');
+    generatedHTML = html;
+    stopLoading(); pushHistory(html); renderFrame(html); showCanvas('output');
+    toast('Design generated! ✨');
+  } catch(e) {
+    stopLoading(); showCanvas(designHistory.length ? 'output' : 'empty');
+    showErr(e.message || 'Something went wrong. Please try again.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate Design';
+}
+
+function renderFrame(html) {
+  const f = document.getElementById('designFrame');
+  f.srcdoc = html;
+  generatedHTML = html;
+  f.onload = () => {
+    try {
+      const h = f.contentDocument?.documentElement?.scrollHeight;
+      if (h && h > 200) f.style.height = h + 20 + 'px';
+    } catch(e) {}
+  };
+}
+
+// ── EXPORT ──
+function exportHTML() {
+  if (!generatedHTML) return;
+  const b = new Blob([generatedHTML], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'designai-' + currentFmt + '-' + Date.now() + '.html';
+  a.click();
+  toast('HTML exported!');
+}
+
+function exportPNG() {
+  if (!generatedHTML) return;
+  toast('Opening design for screenshot…');
+  const win = window.open('', '_blank', 'width=800,height=900');
+  win.document.write(generatedHTML);
+  win.document.close();
+  setTimeout(() => {
+    win.focus();
+    toast('Use browser screenshot or Cmd+Shift+4 (Mac) / Win+Shift+S (Windows) to capture!');
+  }, 800);
+}
+
+// ── SAVE / HISTORY ──
+function saveDesign() {
+  if (!generatedHTML) return;
+  const content = document.getElementById('mainContent').value;
+  const title = content.split('\n')[0].trim().slice(0, 40) || 'Untitled Design';
+  const design = {
+    id: Date.now(),
+    title, format: currentFmt, style: currentStyle,
+    html: generatedHTML,
+    date: new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+  };
+  savedDesigns.unshift(design);
+  localStorage.setItem('dai_saved', JSON.stringify(savedDesigns));
+  toast('Design saved! 💾');
+}
+
+function renderHistory() {
+  const grid = document.getElementById('historyGrid');
+  const empty = document.getElementById('historyEmpty');
+  if (!savedDesigns.length) { grid.style.display = 'none'; empty.style.display = 'block'; return; }
+  empty.style.display = 'none'; grid.style.display = 'grid';
+  grid.innerHTML = savedDesigns.map((d,i) => `
+    <div class="hist-card">
+      <div class="hist-preview">
+        <iframe srcdoc="${d.html.replace(/"/g,'&quot;')}" sandbox="allow-scripts" style="width:100%;height:100%;border:none;pointer-events:none"></iframe>
+      </div>
+      <div class="hist-info">
+        <div class="hist-format">${d.format}</div>
+        <div class="hist-title">${d.title}</div>
+        <div class="hist-date">${d.date}</div>
+      </div>
+      <div class="hist-actions">
+        <button class="hist-btn" onclick="openSaved(${i})">Open in Studio</button>
+        <button class="hist-btn" onclick="downloadSaved(${i})">Export</button>
+        <button class="hist-btn del" onclick="deleteSaved(${i})">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openSaved(i) {
+  const d = savedDesigns[i];
+  generatedHTML = d.html;
+  document.getElementById('mainContent').value = d.title;
+  showPage('studio');
+  showCanvas('output');
+  renderFrame(d.html);
+  pushHistory(d.html);
+  toast('Design loaded in Studio');
+}
+
+function downloadSaved(i) {
+  const d = savedDesigns[i];
+  const b = new Blob([d.html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'design-' + d.id + '.html';
+  a.click();
+}
+
+function deleteSaved(i) {
+  savedDesigns.splice(i, 1);
+  localStorage.setItem('dai_saved', JSON.stringify(savedDesigns));
+  renderHistory();
+  toast('Design deleted');
+}
+
+// ── PRICING ──
+function setBilling(mode) {
+  billing = mode;
+  document.getElementById('ptMonthly').classList.toggle('active', mode === 'monthly');
+  document.getElementById('ptYearly').classList.toggle('active', mode === 'yearly');
+  document.getElementById('proPrice').textContent = mode === 'monthly' ? '₹799' : '₹5,750';
+  document.getElementById('proPeriod').textContent = mode === 'monthly' ? '/month' : '/year';
+  document.getElementById('bizPrice').textContent = mode === 'monthly' ? '₹2,499' : '₹17,990';
+  document.getElementById('bizPeriod').textContent = mode === 'monthly' ? '/month' : '/year';
+}
+
+// ── AUTH ──
+function openModal() { document.getElementById('authModal').classList.add('open'); }
+function closeModal() { document.getElementById('authModal').classList.remove('open'); }
+function switchTab(tab, btn) {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+}
+function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  if (!email) { toast('Please enter your email'); return; }
+  setUser({ name: email.split('@')[0], email });
+  closeModal(); toast('Welcome back! 👋');
+}
+function doSignup() {
+  const name = document.getElementById('signupName').value;
+  const email = document.getElementById('signupEmail').value;
+  if (!name || !email) { toast('Please fill in all fields'); return; }
+  setUser({ name, email });
+  closeModal(); toast('Account created! Welcome to designAI 🎉');
+}
+function googleAuth() {
+  setUser({ name: 'Google User', email: 'user@gmail.com' });
+  closeModal(); toast('Signed in with Google! 👋');
+}
+function setUser(user) {
+  currentUser = user;
+  const initials = user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('navAuthBtn').style.display = 'none';
+  document.getElementById('navUserMenu').style.display = 'block';
+  document.getElementById('userAvatar').textContent = initials;
+  localStorage.setItem('dai_user', JSON.stringify(user));
+}
+function logout() {
+  currentUser = null;
+  document.getElementById('navAuthBtn').style.display = 'block';
+  document.getElementById('navUserMenu').style.display = 'none';
+  document.getElementById('userDropdown').classList.remove('open');
+  localStorage.removeItem('dai_user');
+  toast('Signed out');
+}
+function toggleUserMenu() {
+  document.getElementById('userDropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.user-menu-wrap')) document.getElementById('userDropdown').classList.remove('open');
+});
+
+// ── AFFILIATE ──
+function joinAffiliate() {
+  const email = document.getElementById('affEmail').value;
+  if (!email) { toast('Please enter your email'); return; }
+  toast('Application received! We\'ll email your link within 24h 🎉');
+  document.getElementById('affEmail').value = '';
+}
+
+// ── UTILS ──
+function showErr(msg) {
+  const e = document.getElementById('errBar');
+  e.textContent = msg; e.style.display = 'block';
+  setTimeout(() => e.style.display = 'none', 5000);
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──
+(function init() {
+  const savedUser = localStorage.getItem('dai_user');
+  if (savedUser) { try { setUser(JSON.parse(savedUser)); } catch(e){} }
+  document.getElementById('authModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('authModal')) closeModal();
+  });
+})();
+</script>
+</body>
+</html>
